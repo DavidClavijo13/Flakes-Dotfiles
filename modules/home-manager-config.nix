@@ -1,7 +1,7 @@
 { config, pkgs, lib, ... }:
 
 let
-  # Path to your dotfiles tree
+  # where your real nvim config lives in the flake
   nvimSrc = ../files/nvim;
 in {
   ###########################
@@ -15,8 +15,8 @@ in {
   # Zsh
   ###########################
   programs.zsh = {
-    enable     = true;
-    # After HM’s own init, source your legacy .zshrc:
+    enable = true;
+    # after HM’s own setup, drop into your legacy .zshrc
     initExtra = ''
       source ${../files/.zshrc}
     '';
@@ -31,25 +31,26 @@ in {
   ];
 
   ###########################
-  # Dotfile & Config Folder Symlinks
+  # Dotfiles & Config Folders
   ###########################
   home.file = {
     ".p10k.zsh"       = { source = ../files/.p10k.zsh; };
 
-    # These folders will be fully (recursively) managed
+    # recursive = true pulls in the entire folder tree
     ".config/ghostty" = { source = ../files/ghostty; recursive = true; };
     ".config/hypr"    = { source = ../files/hypr;    recursive = true; };
     ".config/waybar"  = { source = ../files/waybar;  recursive = true; };
+    ".config/nvim"    = { source = ../files/nvim;    recursive = true; };
   };
 
   ########################################
-  # Activation: Copy nvim into a writeable dir
+  # Activation: copy nvim into a writeable directory
   ########################################
-  home.activation.copyNvimConfig = lib.mkAfter "copy-nvim-config" ''
-    # remove any old symlink
+  home.activation.copyNvimConfig = lib.dag.entryAfter [ "writeBoundary" ] ''
+    # remove any old symlink or dir
     rm -rf "$HOME/.config/nvim"
     mkdir -p "$HOME/.config"
-    # copy your nvim tree into a real folder
+    # copy *your* config into place as a normal folder
     cp -r ${nvimSrc} "$HOME/.config/nvim"
   '';
 }
