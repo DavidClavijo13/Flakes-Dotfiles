@@ -1,28 +1,26 @@
 { config, pkgs, lib, ... }:
 
-{
+let
+  dotfiles = ../files;               # your local ~/dotfiles/files
+  homeDir  = "/home/logonix";
+in {
   ###########################
   # Identity & State Version
   ###########################
   home.stateVersion  = "25.05";
   home.username      = "logonix";
-  home.homeDirectory = "/home/logonix";
+  home.homeDirectory = homeDir;
 
   ###########################
   # Zsh + Powerlevel10k
   ###########################
   programs.zsh = {
-    enable = true;
+    enable    = true;
     initExtra = ''
-      # 1) Load Powerlevel10k if it was copied into your home
-      if [ -f "$HOME/.p10k.zsh" ]; then
-        source "$HOME/.p10k.zsh"
-      fi
-
-      # 2) Then load your legacy aliases/functions
-      if [ -f "$HOME/.zshrc" ]; then
-        source "$HOME/.zshrc"
-      fi
+      # 1) source P10k if present
+      [ -f "$HOME/.p10k.zsh" ] && source "$HOME/.p10k.zsh"
+      # 2) then your legacy zshrc
+      [ -f "$HOME/.zshrc" ]    && source "$HOME/.zshrc"
     '';
   };
 
@@ -38,31 +36,33 @@
   # Dotfiles & Config Folders
   ###########################
   home.file = {
-    # ensure these live in your real $HOME
-    ".zshrc"    = { source = ../files/.zshrc;    copy = true; };
-    ".p10k.zsh" = { source = ../files/.p10k.zsh; copy = true; };
+    # simple files—symlinked from the Nix store
+    ".zshrc"    = { source = dotfiles/.zshrc;    };
+    ".p10k.zsh" = { source = dotfiles/.p10k.zsh; };
 
-    # your existing configs as recursive copies
+    # configs you won’t write into—recursive symlinks
     ".config/ghostty" = {
-      source    = ../files/ghostty;
+      source    = dotfiles/ghostty;
       recursive = true;
-      copy      = true;
     };
     ".config/hypr" = {
-      source    = ../files/hypr;
+      source    = dotfiles/hypr;
       recursive = true;
-      copy      = true;
     };
     ".config/waybar" = {
-      source    = ../files/waybar;
+      source    = dotfiles/waybar;
       recursive = true;
-      copy      = true;
-    };
-    ".config/nvim" = {
-      source    = ../files/nvim;
-      recursive = true;
-      copy      = true;
     };
   };
+
+  ###########################
+  # Activation hook to copy nvim config
+  ###########################
+  # On the first `home-manager switch`, copy the whole tree
+  home.activation.copyNvim = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    if [ ! -d "$HOME/.config/nvim" ]; then
+      cp -r ${dotfiles}/nvim "$HOME/.config/nvim"
+    fi
+  '';
 }
 
