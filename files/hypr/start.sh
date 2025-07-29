@@ -1,30 +1,39 @@
 #!/usr/bin/env bash
 # ~/.config/hypr/start.sh
-#
-# Updated to ensure swww has time to initialize before setting the wallpaper.
 
-# 1) Launch the swww daemon in the background
-swww init &
+LOGFILE="$HOME/start.log"
+exec &> >(tee -a "$LOGFILE")
 
-# 2) Determine the runtime directory (fallback if XDG_RUNTIME_DIR isn't set)
-runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+echo "=== start.sh began at $(date) ==="
+echo "PATH = $PATH"
+# 1) Ensure your nix-profile is on PATH
+export PATH="$HOME/.nix-profile/bin:/run/current-system/profile/bin:$PATH"
+echo "Adjusted PATH = $PATH"
 
-# 3) Wait up to 1 second for the swww socket to appear
-for i in {1..10}; do
-  if [ -e "${runtime_dir}/swww.sock" ]; then
-    break
-  fi
-  sleep 0.1
-done
+# 2) Start swww and give it time
+echo "Starting swww daemon…"
+swww init || echo "ERROR: swww init failed!"
+sleep 1
 
-# 4) Now set your wallpaper
-swww img "${HOME}/Downloads/wp4472154-5120x2160-wallpapers.jpg" &
+# 3) Verify the socket
+echo "Runtime socket:"
+ls -l "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/swww.sock" || echo "No socket!"
 
-# 5) Launch the rest of your apps
+# 4) Call swww img via absolute path
+SWWW_BIN="$(command -v swww)"
+echo "swww binary at $SWWW_BIN"
+"$SWWW_BIN" img "$HOME/Downloads/wp4472154-5120x2160-wallpapers.jpg" \
+    --transition-type fade --duration 1 \
+    || echo "ERROR: swww img failed!"
+
+# 5) Launch the rest
+echo "Launching apps…"
 nm-applet --indicator &
 waybar &
 mako &
 flatpak run app.zen_browser.zen &
 discord &
 ghostty &
+
+echo "=== start.sh done at $(date) ==="
 
