@@ -18,11 +18,11 @@
   ];
 
   home.file = {
-    ".p10k.zsh"  = { source = ./files/.p10k.zsh; };
-    ".config/ghostty" = { source = ./files/ghostty; };
-    ".config/hypr"    = { source = ./files/hypr; };
-    ".config/nvim"    = { source = ./files/nvim; };
-    ".config/waybar"  = { source = ./files/waybar; };
+    ".p10k.zsh"     = { source = ../files/.p10k.zsh; };
+    ".config/ghostty" = { source = ../files/ghostty; };
+    ".config/hypr"    = { source = ../files/hypr; };
+    ".config/nvim"    = { source = ../files/nvim; };
+    ".config/waybar"  = { source = ../files/waybar; };
   };
 }
 
