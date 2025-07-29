@@ -1,26 +1,32 @@
 { config, pkgs, lib, ... }:
 
 let
-  # 1. Bind your dotfiles path once to avoid repeating ../files everywhere
+  # centralize your dotfiles directory
   dotfiles = ../files;
+  homeDir  = "/home/logonix";    # or: config.home.homeDirectory
 in {
+  ###########################
+  # Identity & State Version
+  ###########################
   home.stateVersion  = "25.05";
   home.username      = "logonix";
-  home.homeDirectory = "/home/logonix";
+  home.homeDirectory = homeDir;
 
   ###########################
-  # Zsh
+  # Zsh + Powerlevel10k
   ###########################
-  programs.zsh = {
-    enable = true;
-    # 2. Use interactiveShellInit instead of an unsupported prompt option
-    interactiveShellInit = ''
-      # Load Powerlevel10k theme if present
-      [ -f "${HOME}/.p10k.zsh" ] && source "${HOME}/.p10k.zsh"
-      # Load your legacy aliases/functions
-      [ -f "${HOME}/.zshrc" ] && source "${HOME}/.zshrc"
-    '';
-  };
+  programs.zsh.enable = true;
+  programs.zsh.interactiveShellInit = ''
+    # 1) Load Powerlevel10k if it’s been copied in
+    if [ -f "${homeDir}/.p10k.zsh" ]; then
+      source "${homeDir}/.p10k.zsh"
+    fi
+
+    # 2) Then load your legacy aliases/functions
+    if [ -f "${homeDir}/.zshrc" ]; then
+      source "${homeDir}/.zshrc"
+    fi
+  '';
 
   ###########################
   # User-level Packages
@@ -34,18 +40,31 @@ in {
   # Dotfiles & Config Folders
   ###########################
   home.file = {
-    # 3. Explicitly copy in your legacy dotfiles so they live in $HOME
-    ".zshrc" = { source = dotfiles/.zshrc; copy = true; };
+    # ensure these live in your real $HOME
+    ".zshrc"    = { source = dotfiles/.zshrc;    copy = true; };
     ".p10k.zsh" = { source = dotfiles/.p10k.zsh; copy = true; };
 
-    # 4. Keep your config directories as recursive copies
-    ".config/ghostty" = { source = dotfiles/ghostty; recursive = true; copy = true; };
-    ".config/hypr"    = { source = dotfiles/hypr;    recursive = true; copy = true; };
-    ".config/waybar"  = { source = dotfiles/waybar;  recursive = true; copy = true; };
-    ".config/nvim"    = { source = dotfiles/nvim;    recursive = true; copy = true; };
+    # your existing configs as recursive copies
+    ".config/ghostty" = {
+      source    = dotfiles/ghostty;
+      recursive = true;
+      copy      = true;
+    };
+    ".config/hypr" = {
+      source    = dotfiles/hypr;
+      recursive = true;
+      copy      = true;
+    };
+    ".config/waybar" = {
+      source    = dotfiles/waybar;
+      recursive = true;
+      copy      = true;
+    };
+    ".config/nvim" = {
+      source    = dotfiles/nvim;
+      recursive = true;
+      copy      = true;
+    };
   };
-
-  # 5. Future opportunity: if you add more modules, consider grouping similar settings
-  #    (e.g. graphics, audio) into separate Nix files and importing them here.
 }
 
