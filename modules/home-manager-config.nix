@@ -3,7 +3,8 @@
 { config, pkgs, lib, ... }:
 
 let
-  dotfiles = ../files;  # points at ~/dotfiles/files
+  # 1) Point ‘dotfiles’ at your ~/dotfiles/files directory, not the flake root.
+  dotfiles = ../files;
 in {
   ###########################
   # Identity & State Version
@@ -18,20 +19,15 @@ in {
   programs.zsh = {
     enable = true;
     initExtra = ''
-      # 1) Load Powerlevel10k if present
-      if [ -f "$HOME/.p10k.zsh" ]; then
-        source "$HOME/.p10k.zsh"
-      fi
-
-      # 2) Then load your legacy aliases/functions from .zshrc_custom
-      if [ -f "$HOME/.zshrc_custom" ]; then
-        source "$HOME/.zshrc_custom"
-      fi
+      # Load Powerlevel10k if present
+      [ -f "$HOME/.p10k.zsh" ] && source "$HOME/.p10k.zsh"
+      # Then load your legacy ~/.zshrc
+      [ -f "$HOME/.zshrc"    ] && source "$HOME/.zshrc"
     '';
   };
 
   ###########################
-  # User-level Packages
+  # Packages
   ###########################
   home.packages = with pkgs; [
     git zsh neovim ghostty wl-clipboard fzf zoxide jq bc gawk
@@ -42,27 +38,37 @@ in {
   # Dotfiles & Config Folders
   ###########################
   home.file = {
-    # Your legacy zshrc is now renamed to .zshrc_custom
-    ".zshrc_custom" = { source = dotfiles/.zshrc; };
-    ".p10k.zsh"     = { source = dotfiles/.p10k.zsh; };
+    # 2) Override the built-in ~/.zshrc with your file from dotfiles/files
+    ".zshrc" = lib.mkForce {
+      source = "${dotfiles}/.zshrc";  # references ~/dotfiles/files/.zshrc
+    };
 
-    # Other config folders (symlinked)
+    # 3) Bring in your Powerlevel10k config from dotfiles/files
+    ".p10k.zsh" = {
+      source = "${dotfiles}/.p10k.zsh";  # references ~/dotfiles/files/.p10k.zsh
+    };
+
+    # 4) Symlink your other config directories from dotfiles/files
     ".config/ghostty" = {
-      source    = dotfiles/ghostty;
+      source    = "${dotfiles}/ghostty";
       recursive = true;
     };
     ".config/hypr" = {
-      source    = dotfiles/hypr;
+      source    = "${dotfiles}/hypr";
       recursive = true;
     };
     ".config/waybar" = {
-      source    = dotfiles/waybar;
+      source    = "${dotfiles}/waybar";
+      recursive = true;
+    };
+    ".config/nvim" = {
+      source    = "${dotfiles}/nvim";
       recursive = true;
     };
   };
 
   ###########################
-  # One-shot activation: copy nvim config for Lazy.nvim to write into
+  # One-shot: copy nvim for Lazy.nvim writes
   ###########################
   home.activation.copyNvim = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if [ ! -d "$HOME/.config/nvim" ]; then
