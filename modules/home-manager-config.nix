@@ -38,14 +38,16 @@ in {
   # Dotfiles & Config Folders
   ###########################
   home.file = {
-    # We no longer manage ~/.zshrc itself—just source it above—so no conflict.
+    # Zsh/P10k as before
     ".p10k.zsh" = { source = "${dotfiles}/.p10k.zsh"; };
 
-    # Hyprland config + editable start script
-    ".config/hypr/hyprland.conf" = { source = "${dotfiles}/hypr/hyprland.conf"; };
-    ".config/hypr/start.sh"      = { source = "${dotfiles}/hypr/start.sh"; executable = true; };
+    # force-manage the whole hypr directory
+    ".config/hypr" = lib.mkForce {
+      source    = "${dotfiles}/hypr";
+      recursive = true;
+    };
 
-    # Your other configs as recursive symlinks
+    # your other configs (ghostty, waybar, nvim)…
     ".config/ghostty" = {
       source    = "${dotfiles}/ghostty";
       recursive = true;
