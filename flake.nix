@@ -23,8 +23,8 @@
     };
 
     nixosConfigurations = {
-      home-desktop = pkgs.lib.nixosSystem {
-        inherit system;
+      home-desktop = nixpkgs.lib.nixosSystem {
+        system = system;
         modules = [
           ./hosts/home-desktop.nix
           hm.nixosModules.home-manager
