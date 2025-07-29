@@ -3,8 +3,7 @@
 { config, pkgs, lib, ... }:
 
 let
-  # 1) Point ‘dotfiles’ at your ~/dotfiles/files directory, not the flake root.
-  dotfiles = ../files;
+  dotfiles = ../files;  # points at ~/dotfiles/files
 in {
   ###########################
   # Identity & State Version
@@ -17,17 +16,18 @@ in {
   # Zsh + Powerlevel10k
   ###########################
   programs.zsh = {
-    enable = true;
+    enable    = true;
     initExtra = ''
-      # Load Powerlevel10k if present
-      [ -f "$HOME/.p10k.zsh" ] && source "$HOME/.p10k.zsh"
-      # Then load your legacy ~/.zshrc
-      [ -f "$HOME/.zshrc"    ] && source "$HOME/.zshrc"
+      # 1) Source your Powerlevel10k config directly from the flake
+      [ -f "${dotfiles}/.p10k.zsh" ] && source "${dotfiles}/.p10k.zsh"
+
+      # 2) Source your legacy .zshrc directly from the flake
+      [ -f "${dotfiles}/.zshrc" ]    && source "${dotfiles}/.zshrc"
     '';
   };
 
   ###########################
-  # Packages
+  # User-level Packages
   ###########################
   home.packages = with pkgs; [
     git zsh neovim ghostty wl-clipboard fzf zoxide jq bc gawk
@@ -38,17 +38,10 @@ in {
   # Dotfiles & Config Folders
   ###########################
   home.file = {
-    # 2) Override the built-in ~/.zshrc with your file from dotfiles/files
-    ".zshrc" = lib.mkForce {
-      source = "${dotfiles}/.zshrc";  # references ~/dotfiles/files/.zshrc
-    };
+    # Only manage the files you need in $HOME; no .zshrc here, so we avoid conflicts.
+    ".p10k.zsh" = { source = "${dotfiles}/.p10k.zsh"; };
 
-    # 3) Bring in your Powerlevel10k config from dotfiles/files
-    ".p10k.zsh" = {
-      source = "${dotfiles}/.p10k.zsh";  # references ~/dotfiles/files/.p10k.zsh
-    };
-
-    # 4) Symlink your other config directories from dotfiles/files
+    # Other config directories (symlinked from your flake)
     ".config/ghostty" = {
       source    = "${dotfiles}/ghostty";
       recursive = true;
@@ -68,7 +61,7 @@ in {
   };
 
   ###########################
-  # One-shot: copy nvim for Lazy.nvim writes
+  # One-shot activation: copy nvim directory
   ###########################
   home.activation.copyNvim = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if [ ! -d "$HOME/.config/nvim" ]; then
