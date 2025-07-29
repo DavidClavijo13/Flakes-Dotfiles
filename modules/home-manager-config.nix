@@ -10,7 +10,7 @@
   programs.zsh = {
     enable     = true;
     # HM will install zsh, set up completions/prompts, then:
-    initExtra = ''
+    initContent = ''
       # source your existing .zshrc for all your custom bits:
       source ${../files/.zshrc}
     '';
