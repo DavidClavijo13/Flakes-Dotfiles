@@ -28,7 +28,10 @@
 
     ".config/ghostty" = { source = ../files/ghostty; };
     ".config/hypr"    = { source = ../files/hypr; };
-    ".config/nvim"    = { source = ../files/nvim; };
+    ".config/nvim"    = {
+      source = ../files/nvim;
+      recursive = true;
+    };
     ".config/waybar"  = { source = ../files/waybar; };
   };
 }
