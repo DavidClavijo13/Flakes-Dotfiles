@@ -5,7 +5,12 @@
   home.homeDirectory = "/home/logonix";
   home.stateVersion  = "25.05";
 
-  programs.zsh.enable = true;
+  programs.zsh = {
+    enable = true;
+    initExtra = ''
+      source ${./files/.zshrc}
+    '';
+  };
 
   home.packages = with pkgs; [
     git zsh neovim ghostty wl-clipboard fzf zoxide jq bc gawk
@@ -13,7 +18,6 @@
   ];
 
   home.file = {
-    ".zshrc"     = { source = ./files/.zshrc; };
     ".p10k.zsh"  = { source = ./files/.p10k.zsh; };
     ".config/ghostty" = { source = ./files/ghostty; };
     ".config/hypr"    = { source = ./files/hypr; };
