@@ -1,9 +1,6 @@
 { config, pkgs, lib, ... }:
 
-let
-  # Path to your dotfiles’ nvim folder
-  nvimSrc = ../files/nvim;
-in {
+{
   ###########################
   # Identity & State Version
   ###########################
@@ -17,14 +14,7 @@ in {
   programs.zsh = {
     enable = true;
     initExtra = ''
-      # Ensure ~/.config/nvim is a writeable copy of your flake files
-      if [ ! -d "$HOME/.config/nvim" ] || [ ! -w "$HOME/.config/nvim" ]; then
-        rm -rf "$HOME/.config/nvim"
-        mkdir -p "$HOME/.config"
-        cp -r ${../files/nvim} "$HOME/.config/nvim"
-      fi
-
-      # Finally, source your legacy .zshrc
+      # source your legacy .zshrc
       source ${../files/.zshrc}
     '';
   };
@@ -38,16 +28,34 @@ in {
   ];
 
   ###########################
-  # Dotfiles & Config Folders
+  # Dotfiles & Config Folders (copy into $HOME)
   ###########################
   home.file = {
-    ".p10k.zsh"       = { source = ../files/.p10k.zsh; };
+    ".p10k.zsh"       = {
+      source = ../files/.p10k.zsh;
+      copy   = true;
+    };
 
-    ".config/ghostty" = { source = ../files/ghostty; recursive = true; };
-    ".config/hypr"    = { source = ../files/hypr;    recursive = true; };
-    ".config/waybar"  = { source = ../files/waybar;  recursive = true; };
-    ".config/nvim"    = { source = ../files/nvim;    recursive = true; };
+    ".config/ghostty" = {
+      source    = ../files/ghostty;
+      recursive = true;
+      copy      = true;
+    };
+    ".config/hypr"    = {
+      source    = ../files/hypr;
+      recursive = true;
+      copy      = true;
+    };
+    ".config/waybar"  = {
+      source    = ../files/waybar;
+      recursive = true;
+      copy      = true;
+    };
+    ".config/nvim"    = {
+      source    = ../files/nvim;
+      recursive = true;
+      copy      = true;
+    };
   };
-
 }
 
