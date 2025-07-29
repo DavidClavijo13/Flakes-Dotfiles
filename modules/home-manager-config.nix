@@ -1,7 +1,9 @@
+# modules/home-manager-config.nix
+
 { config, pkgs, lib, ... }:
 
 let
-  dotfiles = ../files;    # points at ~/dotfiles/files
+  dotfiles = ../files;  # points at ~/dotfiles/files
 in {
   ###########################
   # Identity & State Version
@@ -16,10 +18,15 @@ in {
   programs.zsh = {
     enable = true;
     initExtra = ''
-      # 1) Load P10k if present
-      [ -f "$HOME/.p10k.zsh" ] && source "$HOME/.p10k.zsh"
-      # 2) Then your legacy ~/.zshrc
-      [ -f "$HOME/.zshrc" ]    && source "$HOME/.zshrc"
+      # 1) Load Powerlevel10k if present
+      if [ -f "$HOME/.p10k.zsh" ]; then
+        source "$HOME/.p10k.zsh"
+      fi
+
+      # 2) Then load your legacy aliases/functions from .zshrc_custom
+      if [ -f "$HOME/.zshrc_custom" ]; then
+        source "$HOME/.zshrc_custom"
+      fi
     '';
   };
 
@@ -35,10 +42,11 @@ in {
   # Dotfiles & Config Folders
   ###########################
   home.file = {
-    # only one .zshrc entry—drop any others you have!
-    ".zshrc"    = { source = dotfiles/.zshrc;    };
-    ".p10k.zsh" = { source = dotfiles/.p10k.zsh; };
+    # Your legacy zshrc is now renamed to .zshrc_custom
+    ".zshrc_custom" = { source = dotfiles/.zshrc; };
+    ".p10k.zsh"     = { source = dotfiles/.p10k.zsh; };
 
+    # Other config folders (symlinked)
     ".config/ghostty" = {
       source    = dotfiles/ghostty;
       recursive = true;
@@ -54,7 +62,7 @@ in {
   };
 
   ###########################
-  # One-shot: copy writable nvim dir
+  # One-shot activation: copy nvim config for Lazy.nvim to write into
   ###########################
   home.activation.copyNvim = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if [ ! -d "$HOME/.config/nvim" ]; then
