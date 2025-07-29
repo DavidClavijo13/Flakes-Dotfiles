@@ -44,7 +44,7 @@ in {
   ############################################
   # Activation: copy nvim into a writeable dir
   ############################################
-  home.activation.copyNvimConfig = lib.mkAfter "writeBoundary" ''
+  home.activation.copyNvimConfig = lib.mkAfter [ "writeBoundary" ] ''
     rm -rf "$HOME/.config/nvim"
     mkdir -p "$HOME/.config"
     cp -r ${nvimSrc} "$HOME/.config/nvim"
