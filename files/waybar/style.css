@@ -15,7 +15,6 @@
 
 #workspaces {
   border-radius: 1rem;
-  margin: 5px;
   background-color: @surface0;
   margin-left: 1rem;
 }
@@ -46,7 +45,7 @@
 #custom-power {
   background-color: @surface0;
   padding: 0.5rem 1rem;
-  margin: 5px 0;
+  margin: 1px 0;
 }
 
 #clock {
