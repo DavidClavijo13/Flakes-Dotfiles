@@ -1,32 +1,30 @@
 { config, pkgs, lib, ... }:
 
-let
-  # centralize your dotfiles directory
-  dotfiles = ../files;
-  homeDir  = "/home/logonix";    # or: config.home.homeDirectory
-in {
+{
   ###########################
   # Identity & State Version
   ###########################
   home.stateVersion  = "25.05";
   home.username      = "logonix";
-  home.homeDirectory = homeDir;
+  home.homeDirectory = "/home/logonix";
 
   ###########################
   # Zsh + Powerlevel10k
   ###########################
-  programs.zsh.enable = true;
-  programs.zsh.interactiveShellInit = ''
-    # 1) Load Powerlevel10k if it’s been copied in
-    if [ -f "${homeDir}/.p10k.zsh" ]; then
-      source "${homeDir}/.p10k.zsh"
-    fi
+  programs.zsh = {
+    enable = true;
+    initExtra = ''
+      # 1) Load Powerlevel10k if it was copied into your home
+      if [ -f "$HOME/.p10k.zsh" ]; then
+        source "$HOME/.p10k.zsh"
+      fi
 
-    # 2) Then load your legacy aliases/functions
-    if [ -f "${homeDir}/.zshrc" ]; then
-      source "${homeDir}/.zshrc"
-    fi
-  '';
+      # 2) Then load your legacy aliases/functions
+      if [ -f "$HOME/.zshrc" ]; then
+        source "$HOME/.zshrc"
+      fi
+    '';
+  };
 
   ###########################
   # User-level Packages
@@ -41,27 +39,27 @@ in {
   ###########################
   home.file = {
     # ensure these live in your real $HOME
-    ".zshrc"    = { source = dotfiles/.zshrc;    copy = true; };
-    ".p10k.zsh" = { source = dotfiles/.p10k.zsh; copy = true; };
+    ".zshrc"    = { source = ../files/.zshrc;    copy = true; };
+    ".p10k.zsh" = { source = ../files/.p10k.zsh; copy = true; };
 
     # your existing configs as recursive copies
     ".config/ghostty" = {
-      source    = dotfiles/ghostty;
+      source    = ../files/ghostty;
       recursive = true;
       copy      = true;
     };
     ".config/hypr" = {
-      source    = dotfiles/hypr;
+      source    = ../files/hypr;
       recursive = true;
       copy      = true;
     };
     ".config/waybar" = {
-      source    = dotfiles/waybar;
+      source    = ../files/waybar;
       recursive = true;
       copy      = true;
     };
     ".config/nvim" = {
-      source    = dotfiles/nvim;
+      source    = ../files/nvim;
       recursive = true;
       copy      = true;
     };
