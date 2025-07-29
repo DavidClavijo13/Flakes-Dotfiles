@@ -1,25 +1,24 @@
 { config, pkgs, lib, ... }:
 
 let
-  dotfiles = ../files;               # your local ~/dotfiles/files
-  homeDir  = "/home/logonix";
+  dotfiles = ../files;    # points at ~/dotfiles/files
 in {
   ###########################
   # Identity & State Version
   ###########################
   home.stateVersion  = "25.05";
   home.username      = "logonix";
-  home.homeDirectory = homeDir;
+  home.homeDirectory = "/home/logonix";
 
   ###########################
   # Zsh + Powerlevel10k
   ###########################
   programs.zsh = {
-    enable    = true;
+    enable = true;
     initExtra = ''
-      # 1) source P10k if present
+      # 1) Load P10k if present
       [ -f "$HOME/.p10k.zsh" ] && source "$HOME/.p10k.zsh"
-      # 2) then your legacy zshrc
+      # 2) Then your legacy ~/.zshrc
       [ -f "$HOME/.zshrc" ]    && source "$HOME/.zshrc"
     '';
   };
@@ -36,11 +35,10 @@ in {
   # Dotfiles & Config Folders
   ###########################
   home.file = {
-    # simple files—symlinked from the Nix store
+    # only one .zshrc entry—drop any others you have!
     ".zshrc"    = { source = dotfiles/.zshrc;    };
     ".p10k.zsh" = { source = dotfiles/.p10k.zsh; };
 
-    # configs you won’t write into—recursive symlinks
     ".config/ghostty" = {
       source    = dotfiles/ghostty;
       recursive = true;
@@ -56,9 +54,8 @@ in {
   };
 
   ###########################
-  # Activation hook to copy nvim config
+  # One-shot: copy writable nvim dir
   ###########################
-  # On the first `home-manager switch`, copy the whole tree
   home.activation.copyNvim = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if [ ! -d "$HOME/.config/nvim" ]; then
       cp -r ${dotfiles}/nvim "$HOME/.config/nvim"
