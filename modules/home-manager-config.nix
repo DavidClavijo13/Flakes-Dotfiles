@@ -17,6 +17,14 @@ in {
   programs.zsh = {
     enable = true;
     initExtra = ''
+      # Ensure ~/.config/nvim is a writeable copy of your flake files
+      if [ ! -d "$HOME/.config/nvim" ] || [ ! -w "$HOME/.config/nvim" ]; then
+        rm -rf "$HOME/.config/nvim"
+        mkdir -p "$HOME/.config"
+        cp -r ${../files/nvim} "$HOME/.config/nvim"
+      fi
+
+      # Finally, source your legacy .zshrc
       source ${../files/.zshrc}
     '';
   };
