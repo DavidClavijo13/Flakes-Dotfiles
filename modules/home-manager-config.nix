@@ -18,11 +18,8 @@ in {
   programs.zsh = {
     enable    = true;
     initExtra = ''
-      # 1) Source your Powerlevel10k config directly from the flake
-      [ -f "${dotfiles}/.p10k.zsh" ] && source "${dotfiles}/.p10k.zsh"
-
-      # 2) Source your legacy .zshrc directly from the flake
-      [ -f "${dotfiles}/.zshrc" ]    && source "${dotfiles}/.zshrc"
+      [ -f "$HOME/.p10k.zsh" ] && source "$HOME/.p10k.zsh"
+      [ -f "$HOME/.zshrc"    ] && source "$HOME/.zshrc"
     '';
   };
 
@@ -38,16 +35,13 @@ in {
   # Dotfiles & Config Folders
   ###########################
   home.file = {
-    # Only manage the files you need in $HOME; no .zshrc here, so we avoid conflicts.
-    ".p10k.zsh" = { source = "${dotfiles}/.p10k.zsh"; };
+    # Core dotfiles
+    ".zshrc"    = lib.mkForce { source = "${dotfiles}/.zshrc"; };
+    ".p10k.zsh" =             { source = "${dotfiles}/.p10k.zsh"; };
 
-    # Other config directories (symlinked from your flake)
+    # Other configs (symlink directories)
     ".config/ghostty" = {
       source    = "${dotfiles}/ghostty";
-      recursive = true;
-    };
-    ".config/hypr" = {
-      source    = "${dotfiles}/hypr";
       recursive = true;
     };
     ".config/waybar" = {
@@ -58,10 +52,19 @@ in {
       source    = "${dotfiles}/nvim";
       recursive = true;
     };
+
+    # Hyprland config and start script
+    ".config/hypr/hyprland.conf" = {
+      source = "${dotfiles}/hypr/hyprland.conf";
+    };
+    ".config/hypr/start.sh" = {
+      source    = "${dotfiles}/hypr/start.sh";
+      executable = true;
+    };
   };
 
   ###########################
-  # One-shot activation: copy nvim directory
+  # One-shot: copy nvim config so Lazy.nvim can write lockfiles
   ###########################
   home.activation.copyNvim = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if [ ! -d "$HOME/.config/nvim" ]; then
