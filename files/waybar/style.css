@@ -9,7 +9,7 @@
 #waybar {
   background: transparent;
   color: @text;
-  margin: 5px 20px;
+  height: 10px;
 }
 
 #workspaces {
