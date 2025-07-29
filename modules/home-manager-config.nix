@@ -1,48 +1,56 @@
 { config, pkgs, lib, ... }:
 
-{
-  # ── Identity ───────────────────────────────────────────────────────────────
+let
+  # Path to your dotfiles tree
+  nvimSrc = ../files/nvim;
+in {
+  ###########################
+  # Identity & State Version
+  ###########################
   home.stateVersion  = "25.05";
   home.username      = "logonix";
   home.homeDirectory = "/home/logonix";
 
-  # ── Shell & Prompt ──────────────────────────────────────────────────────────
+  ###########################
+  # Zsh
+  ###########################
   programs.zsh = {
     enable     = true;
-    # HM will install zsh, set up completions/prompts, then:
-    initContent = ''
-      # source your existing .zshrc for all your custom bits:
+    # After HM’s own init, source your legacy .zshrc:
+    initExtra = ''
       source ${../files/.zshrc}
     '';
   };
 
-  # ── User‐level Packages ─────────────────────────────────────────────────────
+  ###########################
+  # User‐level Packages
+  ###########################
   home.packages = with pkgs; [
     git zsh neovim ghostty wl-clipboard fzf zoxide jq bc gawk
     rofi-wayland mako pavucontrol rofi-pulse-select playerctl wlogout
   ];
 
-  # ── Symlink Your dotfiles & Config Folders ──────────────────────────────────
+  ###########################
+  # Dotfile & Config Folder Symlinks
+  ###########################
   home.file = {
     ".p10k.zsh"       = { source = ../files/.p10k.zsh; };
 
-    ".config/ghostty" = { source = ../files/ghostty; };
-    ".config/hypr"    = { source = ../files/hypr; };
-    ".config/waybar"  = { source = ../files/waybar; };
+    # These folders will be fully (recursively) managed
+    ".config/ghostty" = { source = ../files/ghostty; recursive = true; };
+    ".config/hypr"    = { source = ../files/hypr;    recursive = true; };
+    ".config/waybar"  = { source = ../files/waybar;  recursive = true; };
   };
 
-  let
-    nvimSrc = ./files/nvim;
-  in {
-
-  # Copy nvim config out of the store into a real ~/.config/nvim
-    home.activation.copyNvimConfig = lib.mkAfter "copy-nvim-config" ''
-     rm -rf "$HOME/.config/nvim"
-     mkdir -p "$HOME/.config"
-      cp -r ${nvimSrc} "$HOME/.config/nvim"
-    '';
-
-  # … any other activations …
-  }
+  ########################################
+  # Activation: Copy nvim into a writeable dir
+  ########################################
+  home.activation.copyNvimConfig = lib.mkAfter "copy-nvim-config" ''
+    # remove any old symlink
+    rm -rf "$HOME/.config/nvim"
+    mkdir -p "$HOME/.config"
+    # copy your nvim tree into a real folder
+    cp -r ${nvimSrc} "$HOME/.config/nvim"
+  '';
 }
 
