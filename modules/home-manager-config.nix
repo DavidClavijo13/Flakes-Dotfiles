@@ -28,11 +28,21 @@
 
     ".config/ghostty" = { source = ../files/ghostty; };
     ".config/hypr"    = { source = ../files/hypr; };
-    ".config/nvim"    = {
-      source = ../files/nvim;
-      recursive = true;
-    };
     ".config/waybar"  = { source = ../files/waybar; };
   };
+
+  let
+    nvimSrc = ./files/nvim;
+  in {
+
+  # Copy nvim config out of the store into a real ~/.config/nvim
+    home.activation.copyNvimConfig = lib.mkAfter "copy-nvim-config" ''
+     rm -rf "$HOME/.config/nvim"
+     mkdir -p "$HOME/.config"
+      cp -r ${nvimSrc} "$HOME/.config/nvim"
+    '';
+
+  # … any other activations …
+  }
 }
 
