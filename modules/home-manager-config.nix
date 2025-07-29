@@ -16,10 +16,13 @@ in {
   # Zsh + Powerlevel10k
   ###########################
   programs.zsh = {
-    enable = true;
+    enable    = true;
     initExtra = ''
-      [ -f "$HOME/.p10k.zsh" ] && source "$HOME/.p10k.zsh"
-      [ -f "$HOME/.zshrc"    ] && source "$HOME/.zshrc"
+      # 1) Source your Powerlevel10k config directly from the flake
+      [ -f "${dotfiles}/.p10k.zsh" ] && source "${dotfiles}/.p10k.zsh"
+
+      # 2) Source your legacy .zshrc directly from the flake
+      [ -f "${dotfiles}/.zshrc" ]    && source "${dotfiles}/.zshrc"
     '';
   };
 
@@ -35,21 +38,18 @@ in {
   # Dotfiles & Config Folders
   ###########################
   home.file = {
-    ".zshrc"    = lib.mkForce { source = "${dotfiles}/.zshrc"; };
-    ".p10k.zsh" =             { source = "${dotfiles}/.p10k.zsh"; };
+    # Only manage the files you need in $HOME; no .zshrc here, so we avoid conflicts.
+    ".p10k.zsh" = { source = "${dotfiles}/.p10k.zsh"; };
 
+    # Other config directories (symlinked from your flake)
     ".config/ghostty" = {
       source    = "${dotfiles}/ghostty";
       recursive = true;
     };
-
-    # Copy the entire hypr directory so start.sh is user-owned
     ".config/hypr" = {
       source    = "${dotfiles}/hypr";
       recursive = true;
-      copy      = true;
     };
-
     ".config/waybar" = {
       source    = "${dotfiles}/waybar";
       recursive = true;
@@ -61,7 +61,7 @@ in {
   };
 
   ###########################
-  # One-shot activation: copy nvim config for Lazy.nvim
+  # One-shot activation: copy nvim directory
   ###########################
   home.activation.copyNvim = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if [ ! -d "$HOME/.config/nvim" ]; then
