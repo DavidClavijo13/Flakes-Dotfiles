@@ -47,6 +47,11 @@ in {
       recursive = true;
     };
 
+    ".config/hypr/toggle-waybar.sh" = {
+      source     = "${dotfiles}/hypr/toggle-waybar.sh";
+      executable = true;
+    };
+
     # your other configs (ghostty, waybar, nvim)…
     ".config/ghostty" = {
       source    = "${dotfiles}/ghostty";
