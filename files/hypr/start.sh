@@ -12,7 +12,7 @@ swww img --transition-type simple \
   "$HOME/Downloads/wp4472154-5120x2160-wallpapers.jpg" &
 
 nm-applet --indicator &
-./toggle-waybar.sh &
+~/.config/hypr/toggle-waybar.sh
 mako &
 flatpak run app.zen_browser.zen &
 discord &
