@@ -1,0 +1,18 @@
+configuration {
+    /* only 8 entries visible at once */
+    lines: 8;
+}
+
+@import "catppuccin-macchiato"
+
+window {
+    /* narrow to 30% of the screen */
+    width: 15%;
+    /* zero outer gaps */
+    margin: 0px;
+    /* a bit of padding around entries */
+    padding: 6px;
+    /* smooth, rounded corners */
+    border-radius: 6px;
+}
+
