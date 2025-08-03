@@ -7,7 +7,7 @@ configuration {
 
 window {
     /* narrow to 30% of the screen */
-    width: 30%;
+    width: 10%;
     /* zero outer gaps */
     margin: 0px;
     /* a bit of padding around entries */
