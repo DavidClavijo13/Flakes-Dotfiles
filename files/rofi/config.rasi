@@ -1,6 +1,6 @@
 // @import "catppuccin-latte"
-// @import "catppuccin-frappe"
-@import "catppuccin-macchiato"
+@import "catppuccin-frappe"
+// @import "catppuccin-macchiato"
 // @import "catppuccin-mocha"
 
 * {
