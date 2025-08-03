@@ -22,6 +22,13 @@ sleep 2
 # ──────── 3. Grab all clients JSON once ────────
 clients=$(hyprctl clients -j)
 
+# ──────── 3b. Debug: dump all Discord clients ────────
+echo "=== Discord surfaces from hyprctl ==="
+echo "$clients" \
+  | jq '.[] 
+       | select(.class=="discord") 
+       | { title, address, size, at }'
+
 # ──────── 4. Extract window addresses ────────
 # Two Ghostty, sorted by Y (at[1]):
 mapfile -t ghost_ids < <(
