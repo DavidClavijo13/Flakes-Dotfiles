@@ -48,3 +48,4 @@ wid4=$(wait_for_window "discord")
 hyprctl dispatch movewindowpixel exact 3596 48,address:$wid4
 hyprctl dispatch resizewindowpixel exact 1518 2106,address:$wid4
 
+
