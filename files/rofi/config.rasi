@@ -3,6 +3,11 @@
 // @import "catppuccin-macchiato"
 // @import "catppuccin-mocha"
 
+configuration {
+  font: "JetBrains Mono 18";
+}
+
+
 * {
   selected-active-foreground:  @background;
   lightfg:                     @text;
