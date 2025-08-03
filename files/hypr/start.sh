@@ -8,8 +8,8 @@ nm-applet --indicator &
 ~/.config/hypr/toggle-waybar.sh &
 mako &
 
-ghostty &
-ghostty &
+ghostty --title "top-terminal" &
+ghostty --title "bottom-terminal" &
 flatpak run app.zen_browser.zen &
 discord &
 
