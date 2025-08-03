@@ -11,13 +11,13 @@ nm-applet --indicator &
 ~/.config/hypr/toggle-waybar.sh &
 mako &
 
-# Start applications explicitly (to ensure proper PIDs)
+# Launch apps explicitly
 ghostty &
 ghostty &
 flatpak run app.zen_browser.zen &
 discord &
 
-# Helper to get Window IDs reliably by app class
+# Helper function to reliably find windows by class name
 get_wid_by_class() {
   local class=$1
   local wid
@@ -27,26 +27,32 @@ get_wid_by_class() {
   echo "$wid"
 }
 
-# Wait until all windows are up
-sleep 1
+# Wait until apps launch completely
+sleep 1.5
 
-# Arrange the first ghostty (top-left)
+# Positioning & Resizing explicitly (with floating)
+
+# First ghostty (top-left)
 wid1=$(get_wid_by_class "com.mitchellh.ghostty")
+hyprctl dispatch togglefloating address:$wid1
 hyprctl dispatch movewindowpixel exact 6 48,address:$wid1
 hyprctl dispatch resizewindowpixel exact 1548 1047,address:$wid1
 
-# Arrange the second ghostty (bottom-left)
+# Second ghostty (bottom-left)
 wid2=$(get_wid_by_class "com.mitchellh.ghostty")
+hyprctl dispatch togglefloating address:$wid2
 hyprctl dispatch movewindowpixel exact 6 1107,address:$wid2
 hyprctl dispatch resizewindowpixel exact 1548 1047,address:$wid2
 
-# Arrange Zen browser (center)
+# Zen browser (center)
 wid3=$(get_wid_by_class "zen")
+hyprctl dispatch togglefloating address:$wid3
 hyprctl dispatch movewindowpixel exact 1566 48,address:$wid3
 hyprctl dispatch resizewindowpixel exact 2018 2106,address:$wid3
 
-# Arrange Discord (right)
+# Discord (right)
 wid4=$(get_wid_by_class "discord")
+hyprctl dispatch togglefloating address:$wid4
 hyprctl dispatch movewindowpixel exact 3596 48,address:$wid4
 hyprctl dispatch resizewindowpixel exact 1518 2106,address:$wid4
 
