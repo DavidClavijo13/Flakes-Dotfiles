@@ -41,8 +41,10 @@ hyprctl dispatch movewindowpixel exact 1566 48,address:$zen
 hyprctl dispatch resizewindowpixel exact 2018 2106,address:$zen
 
 # ─────────────────────────────────────
-# Wait for Discord’s *real* window
-for i in {1..100}; do
+# ─────────────────────────────────────
+# Wait up to 5 seconds for Discord’s real window to appear
+discord=""
+for i in {1..50}; do
   discord=$(hyprctl clients -j | jq -r '
     .[] | select(.class == "discord" and .title | test("Discord|Friends")) |
     sort_by(.size[0]) | last | .address')
@@ -50,9 +52,14 @@ for i in {1..100}; do
   sleep 0.1
 done
 
+# Wait an additional 2 seconds to let it resize/stabilize
+sleep 2
+
+# Float + position Discord (if found)
 if [[ -n "$discord" ]]; then
   hyprctl dispatch togglefloating address:$discord
   hyprctl dispatch movewindowpixel exact 3596 48,address:$discord
   hyprctl dispatch resizewindowpixel exact 1518 2106,address:$discord
 fi
+
 
