@@ -1,4 +1,4 @@
-@theme "./catppuccin-macchiato.rasi"
+@theme "catppuccin-macchiato"
 
 configuration {
     /* narrow to 30% of your screen */
