@@ -1,17 +1,18 @@
-@theme "catppuccin-macchiato"
-
 configuration {
-    /* narrow to 30% of your screen */
-    width: 30%;
-    /* show up to 8 entries */
+    /* only 8 entries visible at once */
     lines: 8;
-    /* rounded corners */
-    border-radius: 6;
 }
 
+@theme "catppuccin-macchiato"
+
 window {
-    /* remove extra outer space */
-    margin: 0;
+    /* narrow to 30% of the screen */
+    width: 30%;
+    /* zero outer gaps */
+    margin: 0px;
+    /* a bit of padding around entries */
     padding: 6px;
+    /* smooth, rounded corners */
+    border-radius: 6px;
 }
 
