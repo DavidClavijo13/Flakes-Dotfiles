@@ -14,17 +14,18 @@ mako &
 # Helper function to wait until window appears
 wait_for_window() {
   local class=$1
-  local initial_count=$(hyprctl clients -j | jq "[.[] | select(.class == \"$class\")] | length")
-  local new_count=$initial_count
-  until [ "$new_count" -gt "$initial_count" ]; do
+  local min_width=${2:-100}
+  local min_height=${3:-100}
+  local window=""
+  until [[ -n "$window" ]]; do
     sleep 0.1
-    new_count=$(hyprctl clients -j | jq "[.[] | select(.class == \"$class\")] | length")
+    window=$(hyprctl clients -j | jq -r ".[] | select(.class==\"$class\" and .size[0]>=$min_width and .size[1]>=$min_height) | .address" | tail -1)
   done
-  # Get newest window ID
-  hyprctl clients -j | jq -r "[.[] | select(.class == \"$class\")] | last | .address"
+  sleep 0.2 # extra delay for window readiness
+  echo "$window"
 }
 
-# Launch and position the first ghostty (top-left)
+# Launch and position first ghostty (top-left)
 ghostty &
 wid1=$(wait_for_window "com.mitchellh.ghostty")
 hyprctl dispatch movewindowpixel exact 6 48,address:$wid1
@@ -42,10 +43,9 @@ wid3=$(wait_for_window "zen")
 hyprctl dispatch movewindowpixel exact 1566 48,address:$wid3
 hyprctl dispatch resizewindowpixel exact 2018 2106,address:$wid3
 
-# Launch and position Discord (right)
+# Launch and position Discord explicitly waiting for main window (right)
 discord &
-wid4=$(wait_for_window "discord")
+wid4=$(wait_for_window "discord" 800 600)
 hyprctl dispatch movewindowpixel exact 3596 48,address:$wid4
 hyprctl dispatch resizewindowpixel exact 1518 2106,address:$wid4
-
 
