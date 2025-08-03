@@ -1,4 +1,4 @@
-@theme "$HOME/.config/rofi/catppuccin-macchiato.rasi"
+@theme "./catppuccin-macchiato.rasi"
 
 configuration {
     /* narrow to 30% of your screen */
