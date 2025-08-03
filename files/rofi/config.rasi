@@ -1,0 +1,17 @@
+@theme "$HOME/.config/rofi/catppuccin-macchiato.rasi"
+
+configuration {
+    /* narrow to 30% of your screen */
+    width: 30%;
+    /* show up to 8 entries */
+    lines: 8;
+    /* rounded corners */
+    border-radius: 6;
+}
+
+window {
+    /* remove extra outer space */
+    margin: 0;
+    padding: 6px;
+}
+

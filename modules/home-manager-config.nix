@@ -65,6 +65,10 @@ in {
       source    = "${dotfiles}/nvim";
       recursive = true;
     };
+    ".config/rofi" = {
+      source    = "${dotfiles}/rofi";
+      recursive = true;
+    };
   };
 
   ###########################
