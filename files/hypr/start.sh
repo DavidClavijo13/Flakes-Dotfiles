@@ -47,4 +47,6 @@ hyprctl dispatch resizewindowpixel exact 2018 2106,address:$zen
 # Place Discord
 hyprctl dispatch movewindowpixel exact 3596 48,address:$discord
 hyprctl dispatch resizewindowpixel exact 1518 2106,address:$discord
+hyprctl dispatch bringtofront address:$discord
+
 
