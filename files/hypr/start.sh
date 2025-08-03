@@ -1,75 +1,56 @@
 #!/usr/bin/env bash
 export PATH="$HOME/.nix-profile/bin:/run/current-system/profile/bin:$PATH"
+set -e
 
-# ─────────── Start background daemons & wallpaper ───────────
+# ─────────── Autostart background services ───────────
 swww-daemon --format xrgb &>/dev/null &
 sleep 0.2
-swww img --transition-type simple \
-    "$HOME/Downloads/wp4472154-5120x2160-wallpapers.jpg" &
+swww img --transition-type simple "$HOME/Downloads/wp4472154-5120x2160-wallpapers.jpg" &
 nm-applet --indicator &
 ~/.config/hypr/toggle-waybar.sh &
 mako &
 
-# ─────────── Listen for the four windows ───────────
-(
-  ghost_seen=0
-  placed=0
-
-  # Subscribe to the "openwindow" event, get JSON lines
-  hyprctl subscribe openwindow |
-  jq -c 'select(.mapped == 1)' |
-  while read -r ev; do
-    cls   =$(jq -r '.class'     <<<"$ev")
-    ws    =$(jq -r '.workspace' <<<"$ev")
-    addr  =$(jq -r '.address'   <<<"$ev")
-
-    # ignore windows on other workspaces
-    [ "$ws" -ne 1 ] && continue
-
-    case "$cls" in
-
-      # ─ Ghostty 1 (top-left) ─
-      com.mitchellh.ghostty)
-        ghost_seen=$((ghost_seen+1))
-        if [ $ghost_seen -eq 1 ]; then
-          hyprctl dispatch togglefloating address:$addr
-          hyprctl dispatch movewindowpixel exact 6 48,address:$addr
-          hyprctl dispatch resizewindowpixel exact 1548 1047,address:$addr
-        else
-          # Ghostty 2 (bottom-left)
-          hyprctl dispatch togglefloating address:$addr
-          hyprctl dispatch movewindowpixel exact 6 1107,address:$addr
-          hyprctl dispatch resizewindowpixel exact 1548 1047,address:$addr
-        fi
-        placed=$((placed+1))
-        ;;
-
-      # ─ Zen Browser (center) ─
-      zen)
-        hyprctl dispatch togglefloating address:$addr
-        hyprctl dispatch movewindowpixel exact 1566 48,address:$addr
-        hyprctl dispatch resizewindowpixel exact 2018 2106,address:$addr
-        placed=$((placed+1))
-        ;;
-
-      # ─ Discord (right) ─
-      discord)
-        hyprctl dispatch togglefloating address:$addr
-        hyprctl dispatch movewindowpixel exact 3596 48,address:$addr
-        hyprctl dispatch resizewindowpixel exact 1518 2106,address:$addr
-        placed=$((placed+1))
-        ;;
-
-    esac
-
-    # once we've placed all four, stop listening
-    [ "$placed" -ge 4 ] && break
-  done
-) &  # run subscription in background
-
-# ─────────── Actually launch the apps ───────────
+# ─────────── Launch your four target apps ───────────
 ghostty &
 ghostty &
 flatpak run app.zen_browser.zen &
 discord &
+
+# Give them time to map
+sleep 1
+
+# ─────────── Grab window IDs ───────────
+# 1) Two Ghostty windows, sorted by Y (so the smaller Y = top)
+mapfile -t ghost_ids < <(
+  hyprctl clients -j \
+    | jq -r '[ .[] 
+        | select(.class=="com.mitchellh.ghostty") ] 
+      | sort_by(.at[1]) 
+      | .[].address'
+)
+
+# 2) Zen and Discord
+zen_id=$(hyprctl clients -j | jq -r '.[] | select(.class=="zen") | .address')
+discord_id=$(hyprctl clients -j | jq -r '.[] | select(.class=="discord") | .address')
+
+# ─────────── Position & Size ───────────
+# Top-left Ghostty
+hyprctl dispatch togglefloating address:${ghost_ids[0]}
+hyprctl dispatch movewindowpixel exact 6 48,address:${ghost_ids[0]}
+hyprctl dispatch resizewindowpixel exact 1548 1047,address:${ghost_ids[0]}
+
+# Bottom-left Ghostty
+hyprctl dispatch togglefloating address:${ghost_ids[1]}
+hyprctl dispatch movewindowpixel exact 6 1107,address:${ghost_ids[1]}
+hyprctl dispatch resizewindowpixel exact 1548 1047,address:${ghost_ids[1]}
+
+# Center Zen
+hyprctl dispatch togglefloating address:$zen_id
+hyprctl dispatch movewindowpixel exact 1566 48,address:$zen_id
+hyprctl dispatch resizewindowpixel exact 2018 2106,address:$zen_id
+
+# Right Discord
+hyprctl dispatch togglefloating address:$discord_id
+hyprctl dispatch movewindowpixel exact 3596 48,address:$discord_id
+hyprctl dispatch resizewindowpixel exact 1518 2106,address:$discord_id
 
