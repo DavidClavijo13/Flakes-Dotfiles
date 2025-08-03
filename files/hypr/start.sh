@@ -1,43 +1,52 @@
 #!/usr/bin/env bash
+export PATH="$HOME/.nix-profile/bin:/run/current-system/profile/bin:$PATH"
 
-set -euo pipefail
+# Start wallpaper
+swww-daemon --format xrgb &
+sleep 0.2
+swww img --transition-type simple "$HOME/Downloads/wp4472154-5120x2160-wallpapers.jpg" &
 
-# Wallpaper and services (customize if needed)
-swww init &
-swww img ~/Downloads/wp4472154-5120x2160-wallpapers.jpg &
+# Start background apps
 nm-applet --indicator &
-waybar &
+~/.config/hypr/toggle-waybar.sh &
 mako &
 
-# Define window-launching helper function
-launch_and_wait() {
-  $@ &
-  pid=$!
-  while ! hyprctl clients | grep -q "pid: $pid"; do sleep 0.1; done
-  echo $pid
+# Start applications explicitly (to ensure proper PIDs)
+ghostty &
+ghostty &
+flatpak run app.zen_browser.zen &
+discord &
+
+# Helper to get Window IDs reliably by app class
+get_wid_by_class() {
+  local class=$1
+  local wid
+  until wid=$(hyprctl clients -j | jq -r ".[] | select(.class==\"$class\" and (.at[0] + .at[1]) == 0) | .address"); do
+    sleep 0.1
+  done
+  echo "$wid"
 }
 
-# Ensure workspace 1 is clean and selected
-hyprctl dispatch workspace 1
-hyprctl dispatch killactive # run multiple times if multiple windows persist
+# Wait until all windows are up
+sleep 1
 
-# First Ghostty terminal (top-left)
-pid1=$(launch_and_wait ghostty)
-hyprctl dispatch movewindowpixel exact 6 48,pid:$pid1
-hyprctl dispatch resizewindowpixel exact 1548 1047,pid:$pid1
+# Arrange the first ghostty (top-left)
+wid1=$(get_wid_by_class "com.mitchellh.ghostty")
+hyprctl dispatch movewindowpixel exact 6 48,address:$wid1
+hyprctl dispatch resizewindowpixel exact 1548 1047,address:$wid1
 
-# Second Ghostty terminal (bottom-left)
-pid2=$(launch_and_wait ghostty)
-hyprctl dispatch movewindowpixel exact 6 1107,pid:$pid2
-hyprctl dispatch resizewindowpixel exact 1548 1047,pid:$pid2
+# Arrange the second ghostty (bottom-left)
+wid2=$(get_wid_by_class "com.mitchellh.ghostty")
+hyprctl dispatch movewindowpixel exact 6 1107,address:$wid2
+hyprctl dispatch resizewindowpixel exact 1548 1047,address:$wid2
 
-# Zen Browser (center)
-pid3=$(launch_and_wait zen)
-hyprctl dispatch movewindowpixel exact 1566 48,pid:$pid3
-hyprctl dispatch resizewindowpixel exact 2018 2106,pid:$pid3
+# Arrange Zen browser (center)
+wid3=$(get_wid_by_class "zen")
+hyprctl dispatch movewindowpixel exact 1566 48,address:$wid3
+hyprctl dispatch resizewindowpixel exact 2018 2106,address:$wid3
 
-# Discord (right)
-pid4=$(launch_and_wait discord)
-hyprctl dispatch movewindowpixel exact 3596 48,pid:$pid4
-hyprctl dispatch resizewindowpixel exact 1518 2106,pid:$pid4
+# Arrange Discord (right)
+wid4=$(get_wid_by_class "discord")
+hyprctl dispatch movewindowpixel exact 3596 48,address:$wid4
+hyprctl dispatch resizewindowpixel exact 1518 2106,address:$wid4
 
