@@ -2,55 +2,56 @@
 export PATH="$HOME/.nix-profile/bin:/run/current-system/profile/bin:$PATH"
 set -e
 
-# ─────────── Autostart background services ───────────
+# ─────────── Background daemons & wallpaper ───────────
 swww-daemon --format xrgb &>/dev/null &
-sleep 0.2
+sleep 0.3
 swww img --transition-type simple "$HOME/Downloads/wp4472154-5120x2160-wallpapers.jpg" &
 nm-applet --indicator &
 ~/.config/hypr/toggle-waybar.sh &
 mako &
 
-# ─────────── Launch your four target apps ───────────
-ghostty &
-ghostty &
-flatpak run app.zen_browser.zen &
-discord &
+# ─────────── Helper: wait for a window by PID ───────────
+get_addr_by_pid() {
+  local pid=$1 addr
+  for _ in {1..80}; do
+    addr=$(hyprctl clients -j \
+      | jq -r --arg pid "$pid" '.[] | select(.pid == ($pid|tonumber)) | .address')
+    [[ -n "$addr" && "$addr" != "null" ]] && break
+    sleep 0.1
+  done
+  echo "$addr"
+}
 
-# Give them time to map
-sleep 1
+# ─────────── 1) Ghostty (top-left) ───────────
+ghostty & pid1=$!
+addr1=$(get_addr_by_pid "$pid1")
+hyprctl dispatch togglefloating address:$addr1
+hyprctl dispatch movewindowpixel exact 6 48,address:$addr1
+hyprctl dispatch resizewindowpixel exact 1548 1047,address:$addr1
 
-# ─────────── Grab window IDs ───────────
-# 1) Two Ghostty windows, sorted by Y (so the smaller Y = top)
-mapfile -t ghost_ids < <(
-  hyprctl clients -j \
-    | jq -r '[ .[] 
-        | select(.class=="com.mitchellh.ghostty") ] 
-      | sort_by(.at[1]) 
-      | .[].address'
-)
+# ─────────── 2) Ghostty (bottom-left) ───────────
+ghostty & pid2=$!
+addr2=$(get_addr_by_pid "$pid2")
+hyprctl dispatch togglefloating address:$addr2
+hyprctl dispatch movewindowpixel exact 6 1107,address:$addr2
+hyprctl dispatch resizewindowpixel exact 1548 1047,address:$addr2
 
-# 2) Zen and Discord
-zen_id=$(hyprctl clients -j | jq -r '.[] | select(.class=="zen") | .address')
-discord_id=$(hyprctl clients -j | jq -r '.[] | select(.class=="discord") | .address')
+# ─────────── 3) Zen Browser (center) ───────────
+flatpak run app.zen_browser.zen & pid3=$!
+addr3=$(get_addr_by_pid "$pid3")
+hyprctl dispatch togglefloating address:$addr3
+hyprctl dispatch movewindowpixel exact 1566 48,address:$addr3
+hyprctl dispatch resizewindowpixel exact 2018 2106,address:$addr3
 
-# ─────────── Position & Size ───────────
-# Top-left Ghostty
-hyprctl dispatch togglefloating address:${ghost_ids[0]}
-hyprctl dispatch movewindowpixel exact 6 48,address:${ghost_ids[0]}
-hyprctl dispatch resizewindowpixel exact 1548 1047,address:${ghost_ids[0]}
+# ─────────── 4) Discord (right) ───────────
+discord & pid4=$!
+addr4=$(get_addr_by_pid "$pid4")
 
-# Bottom-left Ghostty
-hyprctl dispatch togglefloating address:${ghost_ids[1]}
-hyprctl dispatch movewindowpixel exact 6 1107,address:${ghost_ids[1]}
-hyprctl dispatch resizewindowpixel exact 1548 1047,address:${ghost_ids[1]}
+# make sure it's floating _before_ moving
+hyprctl dispatch togglefloating address:$addr4
+# give it a moment so it doesn't snap back to tiling
+sleep 0.5
 
-# Center Zen
-hyprctl dispatch togglefloating address:$zen_id
-hyprctl dispatch movewindowpixel exact 1566 48,address:$zen_id
-hyprctl dispatch resizewindowpixel exact 2018 2106,address:$zen_id
-
-# Right Discord
-hyprctl dispatch togglefloating address:$discord_id
-hyprctl dispatch movewindowpixel exact 3596 48,address:$discord_id
-hyprctl dispatch resizewindowpixel exact 1518 2106,address:$discord_id
+hyprctl dispatch movewindowpixel exact 3596 48,address:$addr4
+hyprctl dispatch resizewindowpixel exact 1518 2106,address:$addr4
 
