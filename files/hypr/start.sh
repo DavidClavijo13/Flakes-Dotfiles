@@ -31,14 +31,12 @@ mapfile -t ghost_ids < <(
            | .[].address'
 )
 
-# Zen:
+# Zen Browser:
 zen_id=$(echo "$clients" | jq -r '.[] | select(.class=="zen") | .address')
 
-# Discord: match the one whose title ends with " - Discord"
+# Discord: pick the discord client with the greatest width
 discord_id=$(echo "$clients" \
-  | jq -r '.[] 
-           | select(.class=="discord" and (.title|test(" - Discord$"))) 
-           | .address'
+  | jq -r '[.[] | select(.class=="discord")] | max_by(.size[0]) | .address'
 )
 
 # ──────── 5. Float all four ────────
@@ -48,7 +46,7 @@ hyprctl dispatch togglefloating address:$zen_id
 hyprctl dispatch togglefloating address:$discord_id
 
 # ──────── 6. Move & resize in the exact spots ────────
-hyprctl dispatch movewindowpixel exact 6 48,address:${ghost_ids[0]}
+hyprctl dispatch movewindowpixel exact 6   48,address:${ghost_ids[0]}
 hyprctl dispatch resizewindowpixel exact 1548 1047,address:${ghost_ids[0]}
 
 hyprctl dispatch movewindowpixel exact 6 1107,address:${ghost_ids[1]}
