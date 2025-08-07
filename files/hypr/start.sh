@@ -10,53 +10,58 @@ nm-applet --indicator &
 ~/.config/hypr/toggle-waybar.sh &
 mako &
 
-# ──────── 1. Launch your four windows ────────
-ghostty &
-ghostty &
+# ──────── 1. Launch your four windows with titles ────────
+ghostty --title GhosttyTop &
+ghostty --title GhosttyBottom &
 flatpak run app.zen_browser.zen &
-discord &
+discord &   # main window title will be "Friends - Discord"
 
-# ──────── 2. Give them time to appear ────────
+# ──────── 2. Give them time to map ────────
 sleep 2
 
-# ──────── 3. Grab all clients JSON once ────────
+# ──────── 3. Collect clients JSON ────────
 clients=$(hyprctl clients -j)
 
-# ──────── 4. Extract window addresses ────────
-# Two Ghostty panes (ignore full-width parent):
-mapfile -t ghost_ids < <(
-  echo "$clients" \
-    | jq -r '[.[] 
-        | select(.class=="com.mitchellh.ghostty" and .size[0]<=1548)] 
-      | sort_by(.at[1]) 
-      | .[].address'
-)
+# ──────── 4. Pick out the correct addresses ────────
+# Ghostty Top
+top_id=$(echo "$clients" \
+  | jq -r '.[] 
+      | select(.class=="com.mitchellh.ghostty" 
+               and .title=="GhosttyTop" 
+               and .size[1]==1047) 
+      | .address')
 
-# Zen Browser (center large):
-zen_id=$(echo "$clients" | jq -r '[.[] 
-    | select(.class=="zen" and .size[1]>1500)] 
-  | max_by(.size[0]) 
-  | .address'
-)
+# Ghostty Bottom
+bottom_id=$(echo "$clients" \
+  | jq -r '.[] 
+      | select(.class=="com.mitchellh.ghostty" 
+               and .title=="GhosttyBottom" 
+               and .size[1]==1047) 
+      | .address')
 
-# Discord (right large):
+# Zen (center large)
+zen_id=$(echo "$clients" \
+  | jq -r '.[] 
+      | select(.class=="zen" and .size[1]>1500) 
+      | .address')
+
+# Discord (match by title)
 discord_id=$(echo "$clients" \
-  | jq -r '[.[] | select(.class=="discord" and .size[1]>1500)] 
-    | max_by(.size[0]) 
-    | .address'
-)
+  | jq -r '.[] 
+      | select(.class=="discord" and (.title|test("Discord"))) 
+      | .address')
 
-# ──────── 5. Float all four ────────
-for id in "${ghost_ids[0]}" "${ghost_ids[1]}" "$zen_id" "$discord_id"; do
+# ──────── 5. Float them ────────
+for id in "$top_id" "$bottom_id" "$zen_id" "$discord_id"; do
   hyprctl dispatch togglefloating address:$id
 done
 
-# ──────── 6. Move & resize in the exact spots ────────
-hyprctl dispatch movewindowpixel exact 6    48,address:${ghost_ids[0]}
-hyprctl dispatch resizewindowpixel exact 1548 1047,address:${ghost_ids[0]}
+# ──────── 6. Move & resize into exact spots ────────
+hyprctl dispatch movewindowpixel exact 6    48,address:$top_id
+hyprctl dispatch resizewindowpixel exact 1548 1047,address:$top_id
 
-hyprctl dispatch movewindowpixel exact 6  1107,address:${ghost_ids[1]}
-hyprctl dispatch resizewindowpixel exact 1548 1047,address:${ghost_ids[1]}
+hyprctl dispatch movewindowpixel exact 6   1107,address:$bottom_id
+hyprctl dispatch resizewindowpixel exact 1548 1047,address:$bottom_id
 
 hyprctl dispatch movewindowpixel exact 1566 48,address:$zen_id
 hyprctl dispatch resizewindowpixel exact 2018 2106,address:$zen_id
@@ -64,8 +69,8 @@ hyprctl dispatch resizewindowpixel exact 2018 2106,address:$zen_id
 hyprctl dispatch movewindowpixel exact 3596 48,address:$discord_id
 hyprctl dispatch resizewindowpixel exact 1518 2106,address:$discord_id
 
-# ──────── 7. Un‐float so they rejoin tiling ────────
-for id in "${ghost_ids[0]}" "${ghost_ids[1]}" "$zen_id" "$discord_id"; do
+# ──────── 7. Un‐float so they tile with new windows ────────
+for id in "$top_id" "$bottom_id" "$zen_id" "$discord_id"; do
   hyprctl dispatch togglefloating address:$id
 done
 
