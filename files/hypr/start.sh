@@ -23,27 +23,23 @@ sleep 2
 clients=$(hyprctl clients -j)
 
 # ──────── 4. Extract window addresses ────────
-# Two Ghostty, sorted by Y (at[1]):
 mapfile -t ghost_ids < <(
   echo "$clients" \
     | jq -r '[.[] | select(.class=="com.mitchellh.ghostty")] 
            | sort_by(.at[1]) 
            | .[].address'
 )
-
-# Zen Browser:
 zen_id=$(echo "$clients" | jq -r '.[] | select(.class=="zen") | .address')
-
-# Discord: pick the discord client with the greatest width
 discord_id=$(echo "$clients" \
-  | jq -r '[.[] | select(.class=="discord")] | max_by(.size[0]) | .address'
+  | jq -r '[.[] | select(.class=="discord")] 
+           | max_by(.size[0]) 
+           | .address'
 )
 
 # ──────── 5. Float all four ────────
-hyprctl dispatch togglefloating address:${ghost_ids[0]}
-hyprctl dispatch togglefloating address:${ghost_ids[1]}
-hyprctl dispatch togglefloating address:$zen_id
-hyprctl dispatch togglefloating address:$discord_id
+for id in "${ghost_ids[0]}" "${ghost_ids[1]}" "$zen_id" "$discord_id"; do
+  hyprctl dispatch togglefloating address:$id
+done
 
 # ──────── 6. Move & resize in the exact spots ────────
 hyprctl dispatch movewindowpixel exact 6   48,address:${ghost_ids[0]}
@@ -57,4 +53,9 @@ hyprctl dispatch resizewindowpixel exact 2018 2106,address:$zen_id
 
 hyprctl dispatch movewindowpixel exact 3596 48,address:$discord_id
 hyprctl dispatch resizewindowpixel exact 1518 2106,address:$discord_id
+
+# ──────── 7. Un‐float so they rejoin tiling ────────
+for id in "${ghost_ids[0]}" "${ghost_ids[1]}" "$zen_id" "$discord_id"; do
+  hyprctl dispatch togglefloating address:$id
+done
 
