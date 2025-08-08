@@ -22,7 +22,7 @@
 #workspaces button {
   color: @lavender;
   border-radius: 1rem;
-  padding: 0.4rem;
+  padding: 0.2rem; /* was 0.4rem */
 }
 
 #workspaces button.active {
@@ -44,7 +44,7 @@
 #custom-lock,
 #custom-power {
   background-color: @surface0;
-  padding: 0.5rem 1rem;
+  padding: 0.25rem 1rem; /* was 0.5rem 1rem */
   margin: 1px 0;
 }
 
@@ -91,7 +91,7 @@
 }
 
 #custom-power {
-    padding-left: 0.75rem;
+    padding: 0.25rem 0.75rem; /* was padding-left: 0.75rem */
     margin-right: 0;
     border-radius: 1rem;
     color: @red;
