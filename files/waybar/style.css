@@ -7,7 +7,7 @@
 }
 
 #waybar {
-  background: @base; /* adds solid bg to hide Hyprland window border */
+  background: transparent;
   color: @text;
   padding: 0;
   margin: 0;
@@ -16,7 +16,7 @@
 #workspaces {
   border-radius: 0.5rem;
   background-color: @surface0;
-  margin-left: 0.5rem; /* small left margin for left-most module */
+  margin-left: 0.5rem; /* left margin for first module */
 }
 
 #workspaces button {
@@ -44,7 +44,7 @@
 #custom-lock,
 #custom-power {
   background-color: @surface0;
-  padding: 0.25rem 1rem;
+  padding: 0.25rem 1rem; /* reduced vertical padding */
   margin: 1px 0;
   border-radius: 0.5rem;
 }
@@ -92,8 +92,8 @@
 }
 
 #custom-power {
-    padding: 0.25rem 1rem; /* equal horizontal padding for centering */
-    margin-right: 0.5rem; /* small right margin for right-most module */
+    padding: 0.25rem 0.75rem; /* restored original ratio for centering */
+    margin-right: 0.5rem; /* right margin for last module */
     border-radius: 0.5rem;
     color: @red;
 }
