@@ -33,24 +33,21 @@ done
 hyprctl dispatch layout master
 
 # --- Place windows in master order ---
-# Ghostty-top stays where it is
+# 1) Ghostty-top (already focused) → move Ghostty-bottom DOWN
 hyprctl dispatch focuswindow address:"${ghost_ids[1]}"
-hyprctl dispatch movewindow d  # Ghostty-bottom below top
-sleep 0.05
-hyprctl dispatch focuswindow address:"${ghost_ids[0]}"
-hyprctl dispatch movewindow r  # Zen to the right
-sleep 0.05
-hyprctl dispatch focuswindow address:"$zen_id"
-hyprctl dispatch movewindow r  # Discord to the right of Zen
+hyprctl dispatch movewindow d
 sleep 0.05
 
-# --- Set split ratios ---
+# 2) Focus Ghostty-top again → move Zen RIGHT
 hyprctl dispatch focuswindow address:"${ghost_ids[0]}"
-hyprctl dispatch splitratio 0.31
+hyprctl dispatch movewindow r
 sleep 0.05
-hyprctl dispatch focuswindow address:"${ghost_ids[0]}"
-hyprctl dispatch splitratio 0.50
+
+# 3) Focus Zen → move Discord RIGHT
+hyprctl dispatch focuswindow address:"$zen_id"
+hyprctl dispatch movewindow r
 sleep 0.05
+
 
 # --- Pseudotile + exact sizing ---
 for id in "${ghost_ids[@]}" "$zen_id" "$discord_id"; do
