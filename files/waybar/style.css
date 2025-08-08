@@ -7,32 +7,32 @@
 }
 
 #waybar {
-  background: transparent;
+  background: @base; /* adds solid bg to hide Hyprland window border */
   color: @text;
   padding: 0;
   margin: 0;
 }
 
 #workspaces {
-  border-radius: 0.5rem; /* was 1rem */
+  border-radius: 0.5rem;
   background-color: @surface0;
-  margin-left: 0;
+  margin-left: 0.5rem; /* small left margin for left-most module */
 }
 
 #workspaces button {
   color: @lavender;
-  border-radius: 0.5rem; /* was 1rem */
-  padding: 0.2rem; /* was 0.4rem */
+  border-radius: 0.5rem;
+  padding: 0.2rem;
 }
 
 #workspaces button.active {
   color: @sky;
-  border-radius: 0.5rem; /* was 1rem */
+  border-radius: 0.5rem;
 }
 
 #workspaces button:hover {
   color: @sapphire;
-  border-radius: 0.5rem; /* was 1rem */
+  border-radius: 0.5rem;
 }
 
 #custom-music,
@@ -44,14 +44,14 @@
 #custom-lock,
 #custom-power {
   background-color: @surface0;
-  padding: 0.25rem 1rem; /* was 0.5rem 1rem */
+  padding: 0.25rem 1rem;
   margin: 1px 0;
-  border-radius: 0.5rem; /* was 1rem */
+  border-radius: 0.5rem;
 }
 
 #clock {
   color: @blue;
-  border-radius: 0px 0.5rem 0.5rem 0px; /* was 0px 1rem 1rem 0px */
+  border-radius: 0px 0.5rem 0.5rem 0px;
   margin-right: 1rem;
 }
 
@@ -77,29 +77,29 @@
 
 #pulseaudio {
   color: @maroon;
-  border-radius: 0.5rem 0px 0px 0.5rem; /* was 1rem 0px 0px 1rem */
+  border-radius: 0.5rem 0px 0px 0.5rem;
   margin-left: 1rem;
 }
 
 #custom-music {
   color: @mauve;
-  border-radius: 0.5rem; /* was 1rem */
+  border-radius: 0.5rem;
 }
 
 #custom-lock {
-    border-radius: 0.5rem 0px 0px 0.5rem; /* was 1rem 0px 0px 1rem */
+    border-radius: 0.5rem 0px 0px 0.5rem;
     color: @lavender;
 }
 
 #custom-power {
-    padding: 0.25rem 0.75rem; /* was padding-left: 0.75rem */
-    margin-right: 0;
-    border-radius: 0.5rem; /* was 1rem */
+    padding: 0.25rem 1rem; /* equal horizontal padding for centering */
+    margin-right: 0.5rem; /* small right margin for right-most module */
+    border-radius: 0.5rem;
     color: @red;
 }
 
 #tray {
   margin-right: 1rem;
-  border-radius: 0.5rem; /* was 1rem */
+  border-radius: 0.5rem;
 }
 
