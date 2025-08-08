@@ -96,6 +96,7 @@
     margin-right: 0.5rem; /* right margin for last module */
     border-radius: 0.5rem;
     color: @red;
+    padding-right: 1rem;
 }
 
 #tray {
