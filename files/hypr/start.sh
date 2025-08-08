@@ -9,46 +9,35 @@ swww-daemon --format xrgb &>/dev/null & sleep 0.2
 swww img --transition-type simple "$HOME/Downloads/wp4472154-5120x2160-wallpapers.jpg" &
 nm-applet --indicator & ~/.config/hypr/toggle-waybar.sh & mako &
 
-# --- Launch apps in target workspace ---
+# --- Switch to target workspace ---
 hyprctl dispatch workspace "$target_ws"
-ghostty &
+
+# --- Launch apps ---
 ghostty &
 flatpak run app.zen_browser.zen &
 discord &
+
+# Wait a bit to let windows appear
 sleep 2
 
-# --- Identify ---
+# --- Ensure tiled mode (disable floating if any) ---
 clients=$(hyprctl clients -j)
-mapfile -t ghost_ids < <(echo "$clients" | jq -r \
-  '[.[]|select(.class=="com.mitchellh.ghostty")]|sort_by(.at[1])|.[].address')
-zen_id=$(echo "$clients" | jq -r '[.[]|select(.class=="zen")]|max_by(.size[1])|.address')
-discord_id=$(echo "$clients" | jq -r '[.[]|select(.class=="discord")]|max_by(.size[1])|.address')
+ghost_id=$(echo "$clients" | jq -r '[.[]|select(.class=="com.mitchellh.ghostty")][0].address')
+zen_id=$(echo "$clients" | jq -r '[.[]|select(.class=="zen")][0].address')
+discord_id=$(echo "$clients" | jq -r '[.[]|select(.class=="discord")][0].address')
 
-# --- Float and position precisely ---
-for id in "${ghost_ids[@]}" "$zen_id" "$discord_id"; do
-  hyprctl dispatch setfloating enable,address:"$id"
+for id in "$ghost_id" "$zen_id" "$discord_id"; do
+  hyprctl dispatch setfloating disable,address:"$id"
 done
 
-# Ghostty top
-hyprctl dispatch movewindowpixel exact 6 48,address:${ghost_ids[0]}
-hyprctl dispatch resizewindowpixel exact 1548 1047,address:${ghost_ids[0]}
-# Ghostty bottom
-hyprctl dispatch movewindowpixel exact 6 1107,address:${ghost_ids[1]}
-hyprctl dispatch resizewindowpixel exact 1548 1047,address:${ghost_ids[1]}
-# Zen center
-hyprctl dispatch movewindowpixel exact 1566 48,address:$zen_id
-hyprctl dispatch resizewindowpixel exact 2018 2106,address:$zen_id
-# Discord right
-hyprctl dispatch movewindowpixel exact 3596 48,address:$discord_id
-hyprctl dispatch resizewindowpixel exact 1518 2106,address:$discord_id
-
-# --- Ensure new windows tile above background but below floats ---
-# This works by returning focus to a tiled window or workspace after placing floats.
-# If no tiled window exists, we create a dummy tiled terminal and close it immediately.
-if ! hyprctl clients -j | jq -e '.[] | select(.floating==false)' >/dev/null; then
-  ghostty --title DUMMY_TILED &
-  sleep 0.5
-  dummy_id=$(hyprctl clients -j | jq -r '.[]|select(.title=="DUMMY_TILED")|.address')
-  hyprctl dispatch closewindow address:"$dummy_id"
-fi
+# --- Tile left → center → right ---
+hyprctl dispatch focuswindow address:"$ghost_id"
+hyprctl dispatch movewindow l
+sleep 0.05
+hyprctl dispatch focuswindow address:"$zen_id"
+hyprctl dispatch movewindow r
+sleep 0.05
+hyprctl dispatch focuswindow address:"$discord_id"
+hyprctl dispatch movewindow r
+sleep 0.05
 
