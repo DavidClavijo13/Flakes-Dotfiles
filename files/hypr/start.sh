@@ -17,20 +17,30 @@ ghostty &
 flatpak run app.zen_browser.zen &
 discord &
 
-# Wait a bit to let windows appear
-sleep 2
+# --- Wait until all three classes are present ---
+while true; do
+  clients=$(hyprctl clients -j)
+  got_ghost=$(echo "$clients" | jq -e '.[] | select(.class=="com.mitchellh.ghostty")' >/dev/null && echo 1 || echo 0)
+  got_zen=$(echo "$clients" | jq -e '.[] | select(.class=="zen")' >/dev/null && echo 1 || echo 0)
+  got_discord=$(echo "$clients" | jq -e '.[] | select(.class=="discord")' >/dev/null && echo 1 || echo 0)
+  
+  if [ "$got_ghost" -eq 1 ] && [ "$got_zen" -eq 1 ] && [ "$got_discord" -eq 1 ]; then
+    break
+  fi
+  sleep 0.2
+done
 
-# --- Ensure tiled mode (disable floating if any) ---
-clients=$(hyprctl clients -j)
+# --- Identify window addresses by class ---
 ghost_id=$(echo "$clients" | jq -r '[.[]|select(.class=="com.mitchellh.ghostty")][0].address')
 zen_id=$(echo "$clients" | jq -r '[.[]|select(.class=="zen")][0].address')
 discord_id=$(echo "$clients" | jq -r '[.[]|select(.class=="discord")][0].address')
 
+# --- Make sure they're tiled ---
 for id in "$ghost_id" "$zen_id" "$discord_id"; do
   hyprctl dispatch setfloating disable,address:"$id"
 done
 
-# --- Tile left → center → right ---
+# --- Place left → center → right ---
 hyprctl dispatch focuswindow address:"$ghost_id"
 hyprctl dispatch movewindow l
 sleep 0.05
