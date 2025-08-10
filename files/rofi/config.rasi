@@ -5,7 +5,7 @@
 
 configuration {
   /* set your launcher font & size: */
-  font: "JetBrains Mono 18";
+  font: "JetBrains Mono 15";
   /* keep your line-count narrow if you like: */
   lines: 8;
 }
