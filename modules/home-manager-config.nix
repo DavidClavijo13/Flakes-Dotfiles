@@ -31,7 +31,7 @@ in {
   ###########################
   home.packages = with pkgs; [
     git zsh neovim ghostty wl-clipboard fzf zoxide jq bc gawk
-    rofi-wayland mako pavucontrol rofi-pulse-select playerctl wlogout vscode
+    rofi-wayland mako pavucontrol rofi-pulse-select playerctl wlogout vscode claude-code
   ];
 
   ###########################
