@@ -3,7 +3,7 @@ configuration {
     lines: 8;
 }
 
-@import "catppuccin-macchiato"
+@import "catppuccin-frappe"
 
 window {
     /* narrow to 30% of the screen */
